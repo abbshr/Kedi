@@ -1,0 +1,87 @@
+require "kedi/mathematic"
+require "kedi/event"
+
+module Kedi
+  class Probe < Edge
+    class << self
+      def type(t = nil)
+        t ? @type = t : @type
+      end
+    end
+
+    def initialize(&p)
+      @user_logic = p
+    end
+
+    def customize(&p)
+      @user_logic = p
+    end
+
+    process do |input_event|
+      yield @user_logic.(input_event)
+    end
+
+    produce do |output_event|
+      # boolean stream
+      output_event
+    end
+
+    def only(item)
+      item
+    end
+
+    def both(*items)
+      items.all?
+    end
+
+    def either(*items)
+      items.any?
+    end
+
+    def not(item)
+      !item
+    end
+
+    alias_method :is, :equal
+    def equal(target, value)
+      target == value
+    end
+
+    def morethan(target, value)
+      target > value
+    end
+
+    def lessthan(target, value)
+      target < value
+    end
+
+    def in(target, range)
+      range.include? target
+    end
+
+    def similar(target, regexp)
+      target =~ regexp
+    end
+
+    def start_with(target, prefix)
+      target.start_with? prefix
+    end
+
+    def end_with(target, suffix)
+      target.end_with? suffix
+    end
+
+    def include(target, value)
+      target.include? value
+    end
+
+    alias_method :size, :length
+    def length(target, value)
+      target.size == value
+    end
+
+    def calculate(target)
+      @user_logic.(target)
+    end
+  end
+end
