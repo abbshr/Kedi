@@ -1,3 +1,5 @@
+require "kedi/operator"
+
 module Kedi
   class Selector < Edge
     id :selector

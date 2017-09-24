@@ -1,11 +1,27 @@
 require "kedi/dag"
+require "kedi/rest"
 require "kedi/config"
 require "kedi/version"
 require "kedi/translate"
+require "kedi/eventloop"
 
 module Kedi
   extend self
   attr_reader :config
+
+  def standalone(&p)
+    meow &p
+    start_httpserver
+    start_eventloop
+  end
+
+  def start_httpserver
+    @httpserver = RestServer.new
+  end
+
+  def start_eventloop
+    @eventloop = EventLoop.new
+  end
 
   def meow(&p)
     @config = Config.new { |config| self.instance_exec(config, &p) } 
