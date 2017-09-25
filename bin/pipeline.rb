@@ -1,3 +1,6 @@
+# enable :log, path: "xxx"
+# disable :metric
+
 from :stream {}
 from :mysql {}
 

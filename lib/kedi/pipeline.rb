@@ -20,6 +20,7 @@ module Kedi
       @path.each do |group|
         group.each &:active
       end
+      self
     end
 
     # get event stream

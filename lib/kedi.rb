@@ -5,9 +5,12 @@ require "kedi/version"
 require "kedi/translate"
 require "kedi/eventloop"
 
+require "active_support/all"
+
 module Kedi
   extend self
   attr_reader :config
+  attr_accessor :container
 
   def standalone(&p)
     meow &p
@@ -23,9 +26,20 @@ module Kedi
     @eventloop = EventLoop.new
   end
 
+  # def main
+  #   case @config.mode
+  #   when :standalone
+  #   when :lib
+  #   end
+  # end
+
   def meow(&p)
-    @config = Config.new { |config| self.instance_exec(config, &p) } 
+    @config = Config.new &p
     prepare
+  end
+
+  def loader(path)
+    pipeline { load path }
   end
 
   def pipeline(rule = nil, &p)
@@ -34,11 +48,35 @@ module Kedi
   end
 
   private def prepare
-    generate_dag_container
+    @container = generate_dag_container
+  end
+
+  private def get_raw_rules
+    # flatten nested dirs & get rule file
+    @config.rules_dir
   end
 
   private def generate_dag_container
-    rule = Translate.new @config
-    pipeline(rule)
+    pipelines = load_rules
+    DAG.new pipelines
+  end
+
+  def load_rules(from: :fs)
+    case from
+    when :fs then create_pipeline_from_fs
+    when :persist then create_pipeline_from_persist
+    end
+  end
+
+  def create_pipelines_from_fs
+    get_raw_rules.map do |raw_rule|
+      rule_skeleton = Translator.new raw_rule
+      rule = Rule.new rule_skeleton
+      pipeline(rule)
+    end
+  end
+
+  def create_pipelines_from_persist
+    Rule.all.map { |rule| pipeline(rule) }
   end
 end
