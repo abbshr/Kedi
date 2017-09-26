@@ -3,8 +3,8 @@ module Kedi
     PATH = %i(
       source
       filter
-      injector
-      store
+      inject
+      storage
       calculator
       probe
       destination

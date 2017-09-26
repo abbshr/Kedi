@@ -1,16 +1,35 @@
 module Kedi
   class Rule
-    # class << self
-    #   include Persist
-    # end
-    include Persist
+    def initialize(rule_skeleton)
+      
+    end
 
-    def initialize
-      host = Kedi.config.persist.host
-      port = Kedi.config.persist.port
+    def sources
+      
+    end
 
-      @prefix = Kedi.config.persist.rule_prefix
-      @client = Redis.new host: host, port: port
+    def dests
+      
+    end
+
+    def filter
+      
+    end
+
+    def injector
+      
+    end
+
+    def storage
+      
+    end
+
+    def calculator
+      
+    end
+
+    def probe
+      
     end
   end
 

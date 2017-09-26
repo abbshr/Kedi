@@ -1,3 +1,5 @@
+require "kedi/metrics"
+
 module Kedi
   class Edge
     # class instance variables definition
@@ -59,8 +61,8 @@ module Kedi
 
       @alive? = false
       # 需要使用线程安全的 channel
-      @prev_chans = []
-      @next_chans = []
+      @rx_chans = []
+      @tx_chans = []
 
       validator
     end
@@ -78,11 +80,11 @@ module Kedi
     end
 
     def pipe(chan)
-      @next_chans << chan
+      @tx_chans << chan
     end
 
     def subscribe(chan)
-      @prev_chans << chan
+      @rx_chans << chan
     end
 
     private def validator
@@ -112,9 +114,12 @@ module Kedi
 
     private def consume
       # 默认会忽略 nil/faslse 数据
-      @prev_chans.map do |chan|
+      @rx_chans.map do |chan|
         # 非阻塞 dequeue
-        event = chan.deq(true) raise nil
+        enq_time, event = chan.deq(true) raise nil
+        deq_time = Time.now.to_f
+        # 计算等待处理时间
+        record_wait_span(enq_time, deq_time)
         yield event if event
       end
     end
@@ -124,8 +129,9 @@ module Kedi
     end
 
     private def produce(output_event)
-      @next_chans.map do |chan|
-        chan << output_event
+      @tx_chans.map do |chan|
+        enq_time = Time.now.to_f
+        chan << [enq_time, output_event]
       end
     end
 

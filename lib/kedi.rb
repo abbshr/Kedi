@@ -71,8 +71,8 @@ module Kedi
   def create_pipelines_from_fs
     get_raw_rules.map do |raw_rule|
       rule_skeleton = Translator.new raw_rule
-      rule = Rule.new rule_skeleton
-      pipeline(rule)
+      # rule = Rule.new rule_skeleton
+      pipeline(rule_skeleton)
     end
   end
 
