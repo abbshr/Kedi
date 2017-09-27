@@ -5,6 +5,7 @@ module Kedi
     id :source
 
     consume do
+      # custom underlying source retrieving code
     end
 
     process do |input_event|
@@ -16,6 +17,11 @@ module Kedi
       # @next_chans.map do |chan|
       #   chan << Event.create(output_event)
       # end
+    end
+
+    def initialize(sym_source_name, &config_block)
+      @name = sym_source_name
+      instance_eval &config_block if block_given?
     end
   end
 end

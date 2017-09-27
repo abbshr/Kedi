@@ -22,44 +22,57 @@ gem 'kedi'
 ## Kedi DSL (May be like this …)
 
 ```ruby
-require "kedi"
+# A Kedi pipeline DSL
 
-Kedi.meow do |config|
-  config.enable :log, path: "/tmp/meow.log", size: 1024, by: :daily
-  config.enable :debug
-  config.enable :rules, path: ""
-  config.enable :persist, host: "", port: "", prefix: ""
+# declaration multi-sources to create a event stream
+from :redis
+from :mysql do
+  host "192.168.17.15"
+  port 23333
+  db ""
+end
 
-  config.enable :metrics
+# select the certain event from the event stream to product a new event stream
+select do |event|
+  either(
+    morethan(event.timestamp, 2333333333),
+    isnt(event.host, "localhost")
+  )
+end
+# select { |event| event.everyday&.score }
 
-  pipeline do
-    from :stream {}
-    from :mysql {}
+# overwrite the event payload with the certain field
+overwrite_with :everyday, :score
+# overwrite_with do |event|
+#   event.everyday.score
+# end
 
-    select { |event| event.everyday&.score }
-    overwrite_with :everyday, :score
+# collected events from the stream in a data structure store
+use :window do
+  type :time
+  duration "10minute"
+  every "5sec"
+end
 
-    use :window do
-      type :time
-      duration "10minute"
-      every "5sec"
-    end
+# calculate the result based on the event(set) stream
+calc :means
 
-    calc :means
-    fulfill do
-      only lessthan(97.89)
-    end
+# if the cal result fulfilled with the certain conditions
+fulfill do |payload|
+  only lessthan(97.89)
+end
+# fulfill :custom do |event|
+#   { reason: "xxxx" } if event.payload ** 2 > 1024
+# end
 
-    to :http do |event|
-      message "to low"
-      url "http://example.com/alarm"
-    end
+# when fulfilled, send new event to multi-dests
+to :http do |event|
+  message "to low"
+  url "http://example.com/alarm"
+end
 
-    to :elasticsearch do |event|
-      message "low watermarker alarm"
-      hosts ""
-    end
-  end
-
+to :elasticsearch do |event|
+  message "low watermarker alarm"
+  hosts ""
 end
 ```

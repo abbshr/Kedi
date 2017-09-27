@@ -20,7 +20,11 @@ module Kedi
     def equal(target, value)
       target == value
     end
-  
+
+    def isnt(target, value)
+      target != value
+    end
+
     def morethan(target, value)
       target > value
     end

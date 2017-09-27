@@ -4,7 +4,7 @@ module Kedi
       source
       filter
       inject
-      storage
+      store
       calculator
       probe
       destination
@@ -37,11 +37,7 @@ module Kedi
 
     # overwrite event with the certain value
     def overwrite_with(*path, &map_block)
-      injector = if path.empty?
-        Inject.new &map_block
-      else
-        Inject.new(path, &map_block)
-      end
+      injector = Inject.new(path, &map_block)
       add :injector, injector
     end
 
@@ -53,13 +49,13 @@ module Kedi
 
     # probe type, calculator
     def calc(sym_cal_name, &config_block)
-      calculator = Mathematic.operator sym_cal_name, &config_block
+      calculator = Mathematic.calculator sym_cal_name, &config_block
       add :calculator, calculator
     end
 
     # check if calculator fulfill
-    def fulfill(&condition_block)
-      probe = Probe.new.instance_eval &condition_block
+    def fulfill(mode = nil, &condition_block)
+      probe = Probe.new mode, &condition_block
       add :probe, probe
     end
 
@@ -69,19 +65,22 @@ module Kedi
       add :destination, dest
     end
 
-    private def reshuffle(skeleton)
+    private
+    def reshuffle(skeleton)
       PATH.each_with_index do |sym_edge_name, idx|
         edge = self.send sym_edge_name, skeleton[sym_edge_name]
         insert2(idx, edge)
       end
     end
 
-    private def add(sym_edge_name, edge)
+    private
+    def add(sym_edge_name, edge)
       idx = PATH.find_index sym_edge_name
       insert2(idx, edge)
     end
 
-    private def insert2(idx, edge)
+    private
+    def insert2(idx, edge)
       @path[idx] ||= []
       @path[idx] << edge
     end
