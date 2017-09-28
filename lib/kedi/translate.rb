@@ -7,7 +7,7 @@ module Kedi
     attr_reader :sources
     attr_reader :filter
     attr_reader :inject
-    attr_reader :storage
+    attr_reader :store
     attr_reader :calculator
     attr_reader :probe
     attr_reader :destinitions
@@ -29,7 +29,7 @@ module Kedi
       parse_sources hash_rule["from"]
       parse_filter hash_rule["select"]
       parse_inject hash_rule["overwrite_with"]
-      parse_storage hash_rule["use"]
+      parse_store hash_rule["use"]
       parse_calculator hash_rule["cal"]
       parse_probe hash_rule["fulfill"]
       parse_destinations hash_rule["to"]
@@ -85,23 +85,25 @@ module Kedi
     end
 
     def parse_inject_attr_path(attr_path)
-      raise "`overwrite_with` declaration should be a list, but found a #{attr_path}" unless attr_path.is_a? Array
+      unless attr_path.is_a? Array
+        raise "`overwrite_with` declaration should be a list, but found a #{attr_path}"
+      end
     end
 
-    def parse_storage(hash_storage)
-      @storage =
-        if hash_storage.nil?
+    def parse_store(hash_store)
+      @store =
+        if hash_store.nil?
           nil
         else
-          raise "missing `storage` clause" if hash_storage["storage"].nil?
-          # raise "unknown `sort_by` clause" if hash_storage["sort_by"]
+          raise "missing `store` clause" if hash_store["store"].nil?
+          # raise "unknown `sort_by` clause" if hash_store["sort_by"]
           # {
-          #   storage: hash_storage["storage"],
-          #   sort_by: hash_storage["sort_by"],
-          #   enable_delay: Time.from(hash_storage["enable_delay"]),
+          #   store: hash_store["store"],
+          #   sort_by: hash_store["sort_by"],
+          #   enable_delay: Time.from(hash_store["enable_delay"]),
 
           # }
-          hash_storage["enable_delay"] = Time.from(hash_storage["enable_delay"])
+          hash_store["enable_delay"] = Time.from(hash_store["enable_delay"])
         end
     end
 
@@ -124,7 +126,9 @@ module Kedi
     end
 
     def parse_probe_condition_literal(probe_expression)
-      raise "can not recognize a probe from the `fulfill` expression: #{probe_expression}" unless probe_expression.is_a? Hash
+      unless probe_expression.is_a? Hash
+        raise "can not recognize a probe from the `fulfill` expression: #{probe_expression}"
+      end
       probe_expression
     end
 

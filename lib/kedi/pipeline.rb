@@ -3,16 +3,17 @@ module Kedi
     PATH = %i(
       source
       filter
-      inject
+      substitute
       store
       calculator
       probe
       destination
     )
 
-    def initialize(skeleton = nil)
+    def initialize(skeleton = nil, &p)
       @path = []
       reshuffle(skeleton) if skeleton
+      instance_eval &p if block_given?
     end
 
     def streaming
@@ -37,8 +38,8 @@ module Kedi
 
     # overwrite event with the certain value
     def overwrite_with(*path, &map_block)
-      injector = Inject.new(path, &map_block)
-      add :injector, injector
+      substitute = Substitute.new(path, &map_block)
+      add :substitute, substitute
     end
 
     # use a state store
@@ -68,7 +69,7 @@ module Kedi
     private
     def reshuffle(skeleton)
       PATH.each_with_index do |sym_edge_name, idx|
-        edge = self.send sym_edge_name, skeleton[sym_edge_name]
+        edge = self.public_send sym_edge_name, skeleton[sym_edge_name]
         insert2(idx, edge)
       end
     end

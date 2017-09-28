@@ -1,6 +1,9 @@
 # enable :log, path: "xxx"
 # disable :metric
 
+name "origin"
+description "example desc"
+
 from :stream {}
 from :mysql {}
 
@@ -22,9 +25,14 @@ use :window do
   every "5sec"
 end
 
-calc :means
+# calc :means
+calc :rate do
+  option :actived_size, 25
+  option :trait { |score| score % 2 != 0 }
+end
+
 fulfill do |payload|
-  only lessthan(97.89)
+  only lessthan(payload, 97.89)
 end
 # fulfill :custom do |event|
 #   { reason: "xxxx" } if event.payload ** 2 > 1024

@@ -1,0 +1,42 @@
+name: example
+description: just show the rule
+
+from:
+- name: elasticsearch
+  polling_interval: 5min
+  options:
+- name: rpc
+  polling_interval: 20sec
+  options:
+
+select: |
+  and(
+    lessthan(event.timestamp, x),
+    not(
+      equal(event.payload, y)
+    )
+  )
+
+overwrite_with: [everyday, score]
+
+use:
+  type: window
+  duration: 2min
+  every: 5sec
+
+calc: means
+
+fulfill: only(lessthan(event.size, b))
+  # $only:
+  #   event.size:
+  #     $lessthan: b
+
+to:
+- name: mysql
+  db: test
+  level: warn
+  message: just a test alarm
+- name: elasticsearch
+  fanout_interval: 10min
+  level: warn
+  summary: summary of warn

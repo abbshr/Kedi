@@ -7,64 +7,22 @@ module Kedi
     @dependent_edges = []
     @options_requirements = {}
 
-    # class macros definitions
-    class << self
-      # attr_accessor :description
-      # attr_accessor :dependent_edges
-      # attr_accessor :options_requirements
-
-      # 声明或获取 edge id
-      def id(sym_edge_id = nil)
-        if sym_edge_id.nil?
-          @id
-        else
-          @id = sym_edge_id
-        end
-      end
-
-      def dependent(sym_dep_type)
-        # 声明依赖的 edge type
-        @dependencies_edge << sym_dep_type
-      end
-
-      def option(sym_option_name, required: false, available_values: [], default: nil, &custom_check_block)
-        # 声明选项的配置需求
-        @options_requirements[sym_option_name] = {
-          default: default,
-          required?: required,
-          available_values: available_values,
-          custom_check_block: custom_check_block,
-        }
-      end
-
-      def description(str_desc)
-        @description = str_desc
-      end
-
-      def consume(&consume_block)
-        define_method :consume, &consume_block
-      end
-
-      alias_method :behavior, :process
-      def process(&process_block)
-        define_method :process, &process_block
-      end
-
-      def produce(&produce_block)
-        define_method :produce, &produce_block
-      end
-    end
-
-    def initialize(option, dependencies = [])
-      @option = option
+    def initialize(options = nil, dependencies = [], &block)
+      @options = options || new MutState
       @dependencies = dependencies
 
-      @alive? = false
+      @alive = false
       # 需要使用线程安全的 channel
       @rx_chans = []
       @tx_chans = []
 
+      instance_eval &block if block_given?
+
       validator
+    end
+    
+    def alive?
+      @alive
     end
 
     def id
@@ -77,6 +35,14 @@ module Kedi
 
     def requirements_set
       self.class.instance_variable_get :@options_requirements
+    end
+
+    def option(*args, &block_v)
+      if args.size > 1
+        @options.set *args[0,2]
+      elsif args.size == 1 && block_given?
+        @options.set args.first, block_v
+      end
     end
 
     def pipe(chan)
@@ -137,7 +103,7 @@ module Kedi
 
     private def main_logic
       loop do
-        break unless @alive?
+        break unless alive?
         consume do |input_event|
           process(input_event) { |output_event| produce(output_event) }
         end
@@ -145,16 +111,66 @@ module Kedi
     end
 
     public def activate
-      @alive? = true
+      @alive = true
       @main_thr = Thread.new do
         main_logic
       end
     end
 
     public def deactivate
-      @alive? = false
+      @alive = false
       # @main_thr.exit
     end
 
+  end
+
+  # class macros definitions
+  class << Edge
+
+    # 声明或获取 edge id
+    def id(sym_edge_id = nil)
+      if sym_edge_id.nil?
+        @id
+      else
+        @id = sym_edge_id
+      end
+    end
+
+    def dependent(sym_dep_type)
+      # 声明依赖的 edge type
+      @dependencies_edge << sym_dep_type
+    end
+
+    def option(sym_option_name, required: false, available_values: [], default: nil, &custom_check_block)
+      # 声明选项的配置需求
+      @options_requirements[sym_option_name] = {
+        default: default,
+        required?: required,
+        available_values: available_values,
+        custom_check_block: custom_check_block,
+      }
+    end
+
+    def description(str_desc)
+      @description = str_desc
+    end
+
+    def consume(&consume_block)
+      self.class_eval do
+        define_method :consume, &consume_block
+      end
+    end
+
+    def process(&process_block)
+      self.class_eval do
+        define_method :process, &process_block
+      end
+    end
+
+    def produce(&produce_block)
+      self.class_eval do
+        define_method :produce, &produce_block
+      end
+    end
   end
 end

@@ -5,13 +5,17 @@ module Kedi
   class Probe < Edge
     id :probe
 
+    class CleanRoom
+      include Operator
+    end
+
     process do |input_event|
-      fulfilled = 
-        if @mode.nil?
-          @cleanroom.instance_exec(input_event.payload, &@user_logic)
-        elsif @mode == :custom
-          @user_logic.(input_event)
-        end
+      fulfilled = @cleanroom.instance_exec(input_event, &@user_logic)
+        # if @mode.nil?
+        #   @cleanroom.instance_exec(input_event.payload, &@user_logic)
+        # elsif @mode == :custom
+        #   @user_logic.(input_event)
+        # end
 
       if fulfilled.is_a? TrueClass
         yield template_alarm(input_event)
@@ -29,19 +33,8 @@ module Kedi
 
       }
     end
-    
-    # def calculate(target)
-    #   @user_logic.(target)
-    # end
 
-    # def self.type(t = nil)
-    #   t ? @type = t : @type
-    # end
-
-    class CleanRoom
-      include Operator
-    end
-
+    # TODO: 支持 YAML 查询语法
     def initialize(mode, &condition_block)
       @mode = mode
       @user_logic = condition_block

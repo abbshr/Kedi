@@ -43,7 +43,7 @@ module Kedi
   end
 
   def pipeline(rule = nil, &p)
-    pipe = Pipeline.new(rule).instance_eval &p
+    pipe = Pipeline.new(rule, &p)
     pipe.streaming
   end
 
