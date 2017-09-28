@@ -4,11 +4,11 @@ enable :sandbox, level: 3
 
 # enable :daemon, pidfile: "/var/run/kedi.pid"
 
-set :log, level: "debug",
-          output: %w(stdout stderr file),
-          path: "/var/log/kedi.log",
-          age: "daily",
-          size: "60mb"
+enable :log, level: "debug",
+             output: %w(stdout stderr file),
+             path: "/var/log/kedi.log",
+             age: "daily",
+             size: "60mb"
 
 set :rest, version: "v1",
            path_prefix: "/kedi",
