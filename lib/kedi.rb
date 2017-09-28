@@ -34,12 +34,47 @@ module Kedi
   # end
 
   def meow(&p)
-    @config = Config.new &p
+    @config = Config.new
+    Thread.abort_on_exception = true if @config.debug
+    instance_eval &p if block_given?
     prepare
   end
 
-  def loader(path)
-    pipeline { load path }
+  # 启动/设置选项
+  def enable(sym_option_name, option_value = true)
+    if option_value.is_a? FalseClass
+      option_value = true
+    end
+
+    @config.merge sym_option_name, option_value
+  end
+
+  # 禁用选项
+  def disable(sym_option_name)
+    @config.set sym_option_name, false
+  end
+
+  # 获取选项值
+  def get(sym_option_name)
+    @config.get sym_option_name
+  end
+
+  # 覆盖选项值
+  def set(sym_option_name, value)
+    @config.set sym_option_name, value
+  end
+
+  private
+  def unsafe_load(path, ctx)
+    eval File.read(path, encoding: "UTF-8"), ctx, path
+  end
+  
+  def pipeline_loader(path)
+    pipeline { unsafe_load path, binding }
+  end
+  
+  def config_loader(path)
+    unsafe_load path, binding
   end
 
   def pipeline(rule = nil, &p)

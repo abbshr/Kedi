@@ -1,0 +1,7 @@
+#!/usr/bin/env jruby
+
+# run in stand-alone mode
+
+$LOAD_PATH.unshift File.expand_path("../lib", __dir__)
+require "kedi"
+Kedi.standalone

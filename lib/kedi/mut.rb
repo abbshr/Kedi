@@ -23,6 +23,14 @@ class MutState
     @mut.include? k
   end
 
+  def merge(k, v)
+    if @mut[k].is_a?(Hash) && v.is_a?(Hash)
+      @mut[k].deep_merge! v
+    else
+      set k, v
+    end
+  end
+
   def set(k, v)
     @mut[k] = v
   end
