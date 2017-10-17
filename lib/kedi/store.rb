@@ -10,9 +10,9 @@ module Kedi
       when :list then InfiniteList
       when :hash then Hashie
       when :count_window then Window::CountWindow
-      when :accurate_window then Window::AccurateWindow
+      # when :accurate_window then Window::AccurateWindow
       when :slide_window then Window::SlideWindow
-      end.new &p
+      end.new.instance_eval &p
     end
 
     class State < Edge
@@ -55,6 +55,15 @@ module Kedi
             produce(@store)
           end
         end
+      end
+
+      # DSL
+      def capacity(size)
+        @options.capacity = size
+      end
+
+      def every(duration)
+        @options.every = Time.from(duration)
       end
 
       class RingBuffer
@@ -113,6 +122,14 @@ module Kedi
         def moving_forward(n)
           @store = @store[n..-1]
         end
+
+        def capacity(size)
+          @options.capacity = size
+        end
+
+        def velocity(count)
+          @options.velocity = count
+        end
       end
 
       class TimeWindow < State
@@ -164,6 +181,18 @@ module Kedi
           @next_check_time = Time.now + @duration
           cleaner
         end
+
+        def sort_by(time_type)
+          @options.sort_by = time_type
+        end
+
+        def enable_delay(delay)
+          @options.enable_delay = delay
+        end
+
+        def duration(length)
+          @options.duration = length
+        end
       end
 
       class SlideWindow < TimeWindow
@@ -174,6 +203,10 @@ module Kedi
 
         def update_next_check_time(now)
           @next_check_time = now + @velocity
+        end
+
+        def velocity(length)
+          @options.velocity = length
         end
       end
 
@@ -231,6 +264,7 @@ module Kedi
       id :hash
 
       option :key, required: true
+      option :value, required: false
 
       process do |input_event|
         @store.set(input_event[*@options.key], input_event)
@@ -238,6 +272,18 @@ module Kedi
 
       def initialize
         @store = {}
+      end
+
+      def key(key_name = nil, &p)
+        if key_name.nil?
+          @options.key = p
+        else
+          @options.key = key_name
+        end
+      end
+
+      def value &p
+        @options.value = p
       end
     end
   end

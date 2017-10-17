@@ -77,8 +77,8 @@ module Kedi
     unsafe_load path, binding
   end
 
-  def pipeline(rule = nil, &p)
-    pipe = Pipeline.new(rule, &p)
+  def pipeline(rule = nil, name: nil, &p)
+    pipe = Pipeline.new(rule, name, &p)
     pipe.streaming
   end
 

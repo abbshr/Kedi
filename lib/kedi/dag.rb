@@ -45,10 +45,10 @@ module Kedi
     end
 
     def add(pipeline)
-      @pipelines[pipeline.id] = pipeline
+      @pipelines[pipeline.name] = pipeline
     end
 
-    def stat
+    def stats
       
     end
   end

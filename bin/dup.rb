@@ -1,6 +1,6 @@
 name :dup
 from :pipeline, :name => :origin
-select 
+select
 overwrite_with
 use
 calc

@@ -10,9 +10,10 @@ module Kedi
       destination
     )
 
-    def initialize(skeleton = nil, &p)
+    def initialize(skeleton = nil, name = nil, &p)
       @path = []
       reshuffle(skeleton) if skeleton
+      @name = name
       instance_eval &p if block_given?
     end
 
@@ -24,6 +25,20 @@ module Kedi
       self
     end
 
+    # unique name，注册到 container 中被其他 Pipeline 使用
+    def name(str_name = nil)
+      if str_name.nil?
+        @name
+      else
+        @name = str_name
+      end
+    end
+
+    def description(str_description)
+      @description = str_description
+    end
+
+    # TODO
     # get event stream
     def from(sym_source_name, &config_block)
       src = Source.new(sym_source_name, &config_block)
@@ -60,6 +75,7 @@ module Kedi
       add :probe, probe
     end
 
+    # TODO
     # send out event stream
     def to(sym_dest_name, &config_block)
       dest = Dest.new sym_dest_name, &config_block
