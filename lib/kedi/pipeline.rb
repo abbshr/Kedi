@@ -25,6 +25,28 @@ module Kedi
       self
     end
 
+    def resume
+      
+    end
+
+    def pause
+      
+    end
+
+    def stop
+      
+    end
+
+    def reload
+      
+    end
+
+    def restart
+      
+    end
+
+    ## 规则 DSL
+
     # unique name，注册到 container 中被其他 Pipeline 使用
     def name(str_name = nil)
       if str_name.nil?

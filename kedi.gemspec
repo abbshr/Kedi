@@ -9,19 +9,10 @@ Gem::Specification.new do |spec|
   spec.authors       = ["ran"]
   spec.email         = ["abbshr@outlook.com"]
 
-  spec.summary       = %q{TODO: Write a short summary, because Rubygems requires one.}
-  spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.summary       = %q{a stream process platform}
+  spec.description   = %q{a simple and elegant stream process framework allow manipulating with DSL}
+  spec.homepage      = "https://github.com/abbshr/Kedi"
   spec.license       = "MIT"
-
-  # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
-  # to allow pushing to a single host or delete this section to allow pushing to any host.
-  if spec.respond_to?(:metadata)
-    spec.metadata['allowed_push_host'] = "TODO: Set to 'http://mygemserver.com'"
-  else
-    raise "RubyGems 2.0 or newer is required to protect against " \
-      "public gem pushes."
-  end
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
     f.match(%r{^(test|spec|features)/})
@@ -32,4 +23,14 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler", "~> 1.14"
   spec.add_development_dependency "rake", "~> 10.0"
+  spec.add_development_dependency "pry"
+
+  spec.add_dependency "rack"
+  spec.add_dependency "puma"
+  spec.add_dependency "grape"
+  spec.add_dependency "logging"
+  spec.add_dependency "require_all"
+  spec.add_dependency "redis-object"
+  spec.add_dependency "awesome_print"
+  spec.add_dependency "activesupport"
 end

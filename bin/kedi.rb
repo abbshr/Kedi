@@ -10,7 +10,7 @@ Kedi.meow do |config|
 
   config.enable :metrics
 
-  pipeline do
+  pipeline :example do
     from :stream {}
     from :mysql {}
 

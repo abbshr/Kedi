@@ -1,11 +1,15 @@
 module Kedi
-  class DAG
+  class Container
+    attr_reader :pipelines
+
     def initialize
+      # 每个 pipe 按 unique name 装入
       @pipelines = {}
     end
 
-    def pipelines
-      @pipelines
+    # 激活所有 pipes
+    def run
+      @pipelines.each &:streaming
     end
 
     def pause(id = nil)
@@ -49,7 +53,8 @@ module Kedi
     end
 
     def stats
-      
+      # TODO
+      # 内部状态统计
     end
   end
 end

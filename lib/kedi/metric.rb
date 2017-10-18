@@ -1,5 +1,6 @@
 require "java"
 require "jruby"
+require "kedi/ringbuffer"
 
 module Kedi
   module Metric
@@ -50,10 +51,18 @@ module Kedi
         @rx_chans.map &:size
       end
 
+      def rx_chan_wait_num
+        @rx_chans.map &:num_waiting
+      end
+
       # # 输出队列上的等待数量（下一个等待队列）
       # def tx_chan_size
       #   @tx_chans.map &:size
       # end
+
+      def tx_chan_wait_num
+        @tx_chans.map &:num_waiting
+      end
 
       def input_events
         @input_count

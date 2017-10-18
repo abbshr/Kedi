@@ -1,4 +1,5 @@
 require "kedi/heap"
+require "kedi/ringbuffer"
 
 module Kedi
   module Store
@@ -64,35 +65,6 @@ module Kedi
 
       def every(duration)
         @options.every = Time.from(duration)
-      end
-
-      class RingBuffer
-        def initialize(capacity)
-          @capacity = capacity
-          @buf = []
-          @tail = 0
-        end
-
-        def <<(event)
-          @buf[@tail] = event
-          @tail = (@tail + 1) % @capacity
-        end
-  
-        def size
-          @buf.size
-        end
-  
-        def last
-          @buf[@tail - 1]
-        end
-  
-        def first
-          if size < @capacity
-            0
-          else
-            @tail
-          end
-        end
       end
     end
 
